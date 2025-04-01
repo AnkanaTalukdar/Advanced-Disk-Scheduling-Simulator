@@ -1,0 +1,38 @@
+# Function to run selected algorithm and display results
+def run_algorithm():
+    try:
+        requests = list(map(int, entry_requests.get().split(',')))
+        head = int(entry_head.get())
+        algorithm = algo_var.get()
+        
+        if algorithm == "FCFS":
+            sequence, seek_time = fcfs(requests, head)
+        elif algorithm == "SSTF":
+            sequence, seek_time = sstf(requests, head)
+        elif algorithm == "SCAN":
+            sequence, seek_time = scan(requests, head)
+        elif algorithm == "C-SCAN":
+            sequence, seek_time = cscan(requests, head)
+        else:
+            messagebox.showerror("Error", "Select a valid algorithm!")
+            return
+
+        result_label.config(text=f"Seek Time: {seek_time}")
+        plot_sequence(sequence)
+    except ValueError:
+        messagebox.showerror("Input Error", "Enter valid numeric disk requests and head position.")
+
+# Visualization function
+def plot_sequence(sequence):
+    plt.figure(figsize=(8, 5))
+    plt.plot(sequence, range(len(sequence)), marker='o', linestyle='-', color='b')
+    plt.xlabel("Disk Cylinders")
+    plt.ylabel("Request Order")
+    plt.title("Disk Scheduling Visualization")
+    plt.grid()
+    plt.show()
+
+# GUI using Tkinter
+root = tk.Tk()
+root.title("Disk Scheduling Simulator")
+root.geometry("400x300")
