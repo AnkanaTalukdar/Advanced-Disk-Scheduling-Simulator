@@ -1,0 +1,101 @@
+import tkinter as tk
+from tkinter import messagebox
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Disk Scheduling Algorithms
+def fcfs(requests, head):
+    seek_sequence = [head] + requests
+    seek_time = sum(abs(seek_sequence[i] - seek_sequence[i-1]) for i in range(1, len(seek_sequence)))
+    return seek_sequence, seek_time
+
+def sstf(requests, head):
+    sequence = [head]
+    local_requests = requests.copy()
+    while local_requests:
+        closest = min(local_requests, key=lambda x: abs(x - sequence[-1]))
+        sequence.append(closest)
+        local_requests.remove(closest)
+    seek_time = sum(abs(sequence[i] - sequence[i-1]) for i in range(1, len(sequence)))
+    return sequence, seek_time
+
+def scan(requests, head, disk_size=200, direction="left"):
+    left = [r for r in requests if r < head] + ([0] if direction == "left" else [])
+    right = [r for r in requests if r >= head] + ([disk_size - 1] if direction == "right" else [])
+    left.sort()
+    right.sort()
+    sequence = [head] + (left[::-1] + right if direction == "left" else right + left[::-1])
+    seek_time = sum(abs(sequence[i] - sequence[i-1]) for i in range(1, len(sequence)))
+    return sequence, seek_time
+
+def cscan(requests, head, disk_size=200):
+    left = [r for r in requests if r < head]
+    right = [r for r in requests if r >= head]
+    left.sort()
+    right.sort()
+    sequence = [head] + right + [disk_size - 1, 0] + left
+    seek_time = sum(abs(sequence[i] - sequence[i-1]) for i in range(1, len(sequence)))
+    return sequence, seek_time
+
+# Function to run selected algorithm and display results
+def run_algorithm():
+    try:
+        requests = list(map(int, entry_requests.get().split(',')))
+        head = int(entry_head.get())
+        algorithm = algo_var.get()
+        
+        if algorithm == "FCFS":
+            sequence, seek_time = fcfs(requests, head)
+        elif algorithm == "SSTF":
+            sequence, seek_time = sstf(requests, head)
+        elif algorithm == "SCAN":
+            sequence, seek_time = scan(requests, head)
+        elif algorithm == "C-SCAN":
+            sequence, seek_time = cscan(requests, head)
+        else:
+            messagebox.showerror("Error", "Select a valid algorithm!")
+            return
+
+        result_label.config(text=f"Seek Time: {seek_time}")
+        plot_sequence(sequence)
+    except ValueError:
+        messagebox.showerror("Input Error", "Enter valid numeric disk requests and head position.")
+
+# Visualization function
+def plot_sequence(sequence):
+    plt.figure(figsize=(8, 5))
+    plt.plot(sequence, range(len(sequence)), marker='o', linestyle='-', color='b')
+    plt.xlabel("Disk Cylinders")
+    plt.ylabel("Request Order")
+    plt.title("Disk Scheduling Visualization")
+    plt.grid()
+    plt.show()
+
+# GUI using Tkinter
+root = tk.Tk()
+root.title("Disk Scheduling Simulator")
+root.geometry("400x300")
+
+# Input Fields
+tk.Label(root, text="Disk Requests (comma-separated):").pack()
+entry_requests = tk.Entry(root)
+entry_requests.pack()
+
+tk.Label(root, text="Initial Head Position:").pack()
+entry_head = tk.Entry(root)
+entry_head.pack()
+
+# Algorithm Selection
+algo_var = tk.StringVar(value="FCFS")
+tk.Label(root, text="Select Algorithm:").pack()
+tk.OptionMenu(root, algo_var, "FCFS", "SSTF", "SCAN", "C-SCAN").pack()
+
+# Run Button
+tk.Button(root, text="Run Simulation", command=run_algorithm).pack()
+
+# Result Label
+result_label = tk.Label(root, text="")
+result_label.pack()
+
+# Start GUI Loop
+root.mainloop()
