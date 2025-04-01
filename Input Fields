@@ -1,0 +1,23 @@
+# Input Fields
+tk.Label(root, text="Disk Requests (comma-separated):").pack()
+entry_requests = tk.Entry(root)
+entry_requests.pack()
+
+tk.Label(root, text="Initial Head Position:").pack()
+entry_head = tk.Entry(root)
+entry_head.pack()
+
+# Algorithm Selection
+algo_var = tk.StringVar(value="FCFS")
+tk.Label(root, text="Select Algorithm:").pack()
+tk.OptionMenu(root, algo_var, "FCFS", "SSTF", "SCAN", "C-SCAN").pack()
+
+# Run Button
+tk.Button(root, text="Run Simulation", command=run_algorithm).pack()
+
+# Result Label
+result_label = tk.Label(root, text="")
+result_label.pack()
+
+# Start GUI Loop
+root.mainloop()
